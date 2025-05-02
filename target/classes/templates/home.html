@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace - Home</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary-gold: #D4AF37;
+            --primary-navy: #1A237E;
+            --primary-white: #FFFFFF;
+            --secondary-gold: #FFD700;
+            --secondary-navy: #283593;
+            --text-dark: #333333;
+            --text-light: #666666;
+            --background-light: #F5F5F5;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-light);
+        }
+
+        .header {
+            background-color: var(--primary-white);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-gold);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--primary-navy);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-gold);
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, var(--primary-navy), var(--secondary-navy));
+            color: var(--primary-white);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .welcome-section h1 {
+            color: var(--primary-white);
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+        }
+
+        .welcome-section p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .posts-section, .donations-section {
+            margin-top: 3rem;
+            padding: 2rem;
+            background-color: var(--primary-white);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-gold);
+        }
+
+        .section-header h2 {
+            color: var(--primary-navy);
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .post-card, .donation-card {
+            background: var(--primary-white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--primary-gold);
+            cursor: default;
+        }
+
+        .post-card:hover, .donation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(212, 175, 55, 0.2);
+        }
+
+        .post-image, .donation-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 2px solid var(--primary-gold);
+        }
+
+        .post-content, .donation-content {
+            padding: 1.5rem;
+        }
+
+        .post-title, .donation-title {
+            color: var(--primary-navy);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0 0 1rem 0;
+        }
+
+        .post-description, .donation-description {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .post-meta, .donation-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .post-shop, .donation-amount {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-navy);
+        }
+
+        .post-shop i, .donation-amount i {
+            color: var(--primary-gold);
+        }
+
+        .post-date, .donation-date {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .post-status, .donation-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+
+        .post-status.active, .donation-status.active {
+            background-color: rgba(212, 175, 55, 0.1);
+            color: var(--primary-gold);
+        }
+
+        .post-status.inactive, .donation-status.expired {
+            background-color: rgba(26, 35, 126, 0.1);
+            color: var(--primary-navy);
+        }
+
+        .donation-progress {
+            margin: 1.5rem 0;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: var(--background-light);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-gold);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .donate-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--primary-navy);
+            color: var(--primary-white);
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            margin-top: 1rem;
+            border: none;
+            cursor: pointer;
+        }
+
+        .donate-button:hover {
+            background-color: var(--secondary-navy);
+        }
+
+        .donate-button:disabled {
+            background-color: var(--text-light);
+            cursor: not-allowed;
+        }
+
+        .view-details-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--primary-gold);
+            color: var(--primary-white);
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            margin-top: 1rem;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .view-details-button:hover {
+            background-color: var(--secondary-gold);
+        }
+
+        .details-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .details-modal-content {
+            position: relative;
+            background-color: var(--primary-white);
+            margin: 5% auto;
+            padding: 2rem;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-gold);
+        }
+
+        .details-title {
+            color: var(--primary-navy);
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .details-section {
+            margin-bottom: 2rem;
+        }
+
+        .details-section h3 {
+            color: var(--primary-navy);
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+        }
+
+        .details-section p {
+            color: var(--text-light);
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border: 2px solid var(--primary-gold);
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .details-item {
+            background-color: var(--background-light);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .details-item h4 {
+            color: var(--primary-navy);
+            margin-bottom: 0.5rem;
+        }
+
+        .details-item p {
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .close-details-modal {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--primary-navy);
+        }
+
+        .close-details-modal:hover {
+            color: var(--primary-gold);
+        }
+
+        .no-posts {
+            text-align: center;
+            padding: 3rem;
+            background-color: var(--primary-white);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .no-posts i {
+            font-size: 3rem;
+            color: var(--primary-gold);
+            margin-bottom: 1rem;
+        }
+
+        .no-posts h3 {
+            color: var(--primary-navy);
+            margin-bottom: 0.5rem;
+        }
+
+        .no-posts p {
+            color: var(--text-light);
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .posts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome-section {
+                padding: 2rem 1rem;
+            }
+
+            .welcome-section h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: var(--primary-white);
+            margin: 10% auto;
+            padding: 2rem;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--primary-navy);
+        }
+
+        .close-modal:hover {
+            color: var(--primary-gold);
+        }
+
+        .modal-title {
+            color: var(--primary-navy);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .qr-container {
+            text-align: center;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background-color: var(--background-light);
+            border-radius: 8px;
+        }
+
+        .qr-code {
+            max-width: 200px;
+            margin: 0 auto;
+        }
+
+        .payment-details {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: var(--background-light);
+            border-radius: 8px;
+        }
+
+        .payment-details p {
+            margin: 0.5rem 0;
+            color: var(--primary-navy);
+        }
+
+        .payment-amount {
+            font-weight: bold;
+            color: var(--primary-gold);
+        }
+    </style>
+    <!-- Debug information -->
+    <div th:if="${#authentication != null}" style="background-color: #f8f9fa; padding: 10px; margin-bottom: 20px; border-radius: 5px;">
+        <h4>Debug Information:</h4>
+        <p>Is Authenticated: <span th:text="${#authentication != null}"></span></p>
+        <p>Username: <span th:text="${#authentication?.name}"></span></p>
+    </div>
+    <script>
+        window.onload = function() {
+            const rolesElement = document.getElementById('userRoles');
+            if (rolesElement) {
+                console.log('User Roles:', rolesElement.textContent);
+            }
+        }
+    </script>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <a href="/" class="logo">Marketplace</a>
+            <div class="nav-links">
+                <a href="/" class="active"><i class="fas fa-home"></i> Home</a>
+                <a th:if="${userRole == 'SHOP_OWNER'}" href="/shop/posts">
+                    <i class="fas fa-store"></i> Shop Dashboard
+                </a>
+                <a th:if="${userRole == 'ADMIN'}" href="/admin/dashboard">
+                    <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                </a>
+                <form th:action="@{/logout}" method="post" style="margin: 0;">
+                    <button type="submit" class="logout-btn" style="background: none; border: none; color: var(--primary-navy); font-weight: 500; cursor: pointer; font-size: 1rem; padding: 0; display: flex; align-items: center; gap: 0.5rem; transition: color 0.3s;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="welcome-section">
+            <h1>Welcome to Marketplace</h1>
+            <p>Discover the latest updates and offers from our community of shops</p>
+        </section>
+
+        <section class="posts-section">
+            <div class="section-header">
+                <h2>Recent Posts</h2>
+            </div>
+            
+            <div class="posts-grid" th:if="${not #lists.isEmpty(posts)}">
+                <div th:each="post : ${posts}" 
+                     class="post-card"
+                     th:data-post-id="${post.id}"
+                     th:data-post-type="REGULAR">
+                    <img th:if="${post.imageUrl != null}" th:src="${post.imageUrl}" alt="Post image" class="post-image">
+                    <div class="post-content">
+                        <h3 class="post-title" th:text="${post.title}">Post Title</h3>
+                        <p class="post-description" th:text="${post.description}">Post description...</p>
+                        
+                        <div class="post-meta">
+                            <div class="post-shop">
+                                <i class="fas fa-store"></i>
+                                <span th:text="${post.shop != null ? post.shop.name : 'Not available'}">Shop Name</span>
+                            </div>
+                            <div class="post-date">
+                                <i class="far fa-clock"></i>
+                                <span th:text="${#temporals.format(post.createdAt, 'MMM dd, yyyy')}">Date</span>
+                            </div>
+                        </div>
+                        
+                        <div class="post-status" th:classappend="${post.status == 'ACTIVE' ? 'active' : 'inactive'}">
+                            <i class="fas" th:classappend="${post.status == 'ACTIVE' ? 'fa-check-circle' : 'fa-ban'}"></i>
+                            <span th:text="${post.status}">Status</span>
+                        </div>
+
+                        <button class="view-details-button" 
+                                th:data-post-id="${post.id}"
+                                th:data-post-title="${post.title}"
+                                th:data-post-description="${post.description}"
+                                th:data-shop-name="${post.shop != null ? post.shop.name : 'Not available'}"
+                                th:data-shop-owner="${post.shop != null ? post.shop.owner : 'Not available'}"
+                                th:data-shop-email="${post.shop != null ? post.shop.email : 'Not available'}"
+                                th:data-shop-phone="${post.shop != null ? post.shop.phone : 'Not available'}"
+                                th:data-shop-address="${post.shop != null ? post.shop.address : 'Not available'}"
+                                th:data-shop-location="${post.shop != null ? post.shop.location : 'Not available'}"
+                                th:data-shop-website="${post.shop != null ? post.shop.website : 'Not available'}"
+                                th:data-shop-category="${post.shop != null ? post.shop.category : 'Not available'}"
+                                th:data-shop-description="${post.shop != null ? post.shop.description : 'Not available'}"
+                                th:data-shop-registration-date="${post.shop != null and post.shop.registrationDate != null ? #temporals.format(post.shop.registrationDate, 'MMM dd, yyyy') : 'Not available'}"
+                                th:data-post-date="${#temporals.format(post.createdAt, 'MMM dd, yyyy')}"
+                                th:data-image-url="${post.imageUrl != null ? post.imageUrl : ''}">
+                            <i class="fas fa-info-circle"></i> View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(posts)}" class="no-posts">
+                <i class="fas fa-newspaper"></i>
+                <h3>No Posts Available</h3>
+                <p>There are no posts to display at the moment.</p>
+            </div>
+        </section>
+
+        <section class="donations-section">
+            <div class="section-header">
+                <h2>Donation Campaigns</h2>
+            </div>
+            
+            <div class="posts-grid" th:if="${not #lists.isEmpty(donationPosts)}">
+                <div th:each="donation : ${donationPosts}" 
+                     class="donation-card"
+                     th:data-donation-id="${donation.id}"
+                     th:data-donation-type="DONATION">
+                    <img th:if="${donation.imageUrl != null}" th:src="${donation.imageUrl}" alt="Donation image" class="donation-image">
+                    <div class="donation-content">
+                        <h3 class="donation-title" th:text="${donation.title}">Donation Title</h3>
+                        <p class="donation-description" th:text="${donation.description}">Donation description...</p>
+                        
+                        <div class="donation-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" 
+                                     th:style="'width: ' + ${donation.receivedAmount != null and donation.targetAmount != null and donation.targetAmount > 0 ? 
+                                         (donation.receivedAmount / donation.targetAmount * 100) : 0} + '%'">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="donation-meta">
+                            <div class="donation-amount">
+                                <i class="fas fa-donate"></i>
+                                <span th:text="${donation.receivedAmount != null ? donation.receivedAmount : 0} + ' / ' + ${donation.targetAmount != null ? donation.targetAmount : 0}">Amount</span>
+                            </div>
+                            <div class="donation-date">
+                                <i class="far fa-clock"></i>
+                                <span th:text="${donation.endDate != null ? #temporals.format(donation.endDate, 'MMM dd, yyyy') : 'No end date'}">End Date</span>
+                            </div>
+                        </div>
+                        
+                        <div class="donation-status" 
+                             th:classappend="${donation.status == 'ACTIVE' ? 'active' : 
+                                           donation.status == 'EXPIRED' ? 'expired' : 
+                                           donation.status == 'COMPLETED' ? 'completed' : ''}">
+                            <i class="fas" 
+                               th:classappend="${donation.status == 'ACTIVE' ? 'fa-check-circle' : 
+                                             donation.status == 'EXPIRED' ? 'fa-ban' : 
+                                             donation.status == 'COMPLETED' ? 'fa-check-double' : ''}">
+                            </i>
+                            <span th:text="${donation.status != null ? donation.status : 'UNKNOWN'}">Status</span>
+                        </div>
+                        <button class="donate-button" 
+                                th:disabled="${donation.status != 'ACTIVE'}"
+                                th:data-id="${donation.id}"
+                                th:data-title="${donation.title}"
+                                th:data-amount="${donation.targetAmount}">
+                            <i class="fas fa-donate"></i> Donate
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(donationPosts)}" class="no-posts">
+                <i class="fas fa-hand-holding-heart"></i>
+                <h3>No Donation Campaigns Available</h3>
+                <p>There are no active donation campaigns at the moment.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Donation Modal -->
+    <div id="donationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeDonationModal()">&times;</span>
+            <h2 class="modal-title">Donate via UPI</h2>
+            <div class="qr-container">
+                <div id="qrCode" class="qr-code"></div>
+            </div>
+            <div class="payment-details">
+                <p>Campaign: <span id="campaignTitle"></span></p>
+                <p>Amount: <span id="paymentAmount" class="payment-amount"></span></p>
+                <p>Scan the QR code to complete your payment</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Post Details Modal -->
+    <div id="postDetailsModal" class="details-modal">
+        <div class="details-modal-content">
+            <span class="close-details-modal" onclick="closePostDetailsModal()">&times;</span>
+            <div class="details-header">
+                <h2 class="details-title" id="detailsPostTitle"></h2>
+            </div>
+            <img id="detailsPostImage" class="modal-image" alt="Post image">
+            <div class="details-section">
+                <h3>Post Information</h3>
+                <p id="detailsPostDescription"></p>
+                <p><strong>Posted on:</strong> <span id="detailsPostDate"></span></p>
+            </div>
+            <div class="details-section">
+                <h3>Shop Information</h3>
+                <div class="details-grid">
+                    <div class="details-item">
+                        <h4>Shop Name</h4>
+                        <p id="detailsShopName"></p>
+                    </div>
+                    <div class="details-item">
+                        <h4>Owner</h4>
+                        <p id="detailsShopOwner"></p>
+                    </div>
+                    <div class="details-item">
+                        <h4>Category</h4>
+                        <p id="detailsShopCategory"></p>
+                    </div>
+                    <div class="details-item">
+                        <h4>Location</h4>
+                        <p id="detailsShopLocation"></p>
+                    </div>
+                    <div class="details-item">
+                        <h4>Address</h4>
+                        <p id="detailsShopAddress"></p>
+                    </div>
+                    <div class="details-item">
+                        <h4>Contact Email</h4>
+                        <p id="detailsShopEmail"></p>
+                    </div>
+                    <div class="details-item">
+                        <h4>Contact Phone</h4>
+                        <p id="detailsShopPhone"></p>
+                    </div>
+                    <div class="details-item">
+                        <h4>Website</h4>
+                        <p id="detailsShopWebsite"></p>
+                    </div>
+                    <div class="details-item">
+                        <h4>Registration Date</h4>
+                        <p id="detailsShopRegistrationDate"></p>
+                    </div>
+                </div>
+                <div class="details-item" style="grid-column: 1 / -1;">
+                    <h4>About the Shop</h4>
+                    <p id="detailsShopDescription"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle donate button clicks
+            document.querySelectorAll('.donate-button').forEach(button => {
+                button.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    const donationId = this.getAttribute('data-id');
+                    const title = this.getAttribute('data-title');
+                    const amount = this.getAttribute('data-amount');
+                    showDonationModal(donationId, title, amount);
+                });
+            });
+
+            // Handle view details button clicks
+            document.querySelectorAll('.view-details-button').forEach(button => {
+                button.addEventListener('click', function(event) {
+                    event.stopPropagation();
+                    const postId = this.getAttribute('data-post-id');
+                    const title = this.getAttribute('data-post-title');
+                    const description = this.getAttribute('data-post-description');
+                    const shopName = this.getAttribute('data-shop-name');
+                    const shopOwner = this.getAttribute('data-shop-owner');
+                    const shopEmail = this.getAttribute('data-shop-email');
+                    const shopPhone = this.getAttribute('data-shop-phone');
+                    const shopAddress = this.getAttribute('data-shop-address');
+                    const shopLocation = this.getAttribute('data-shop-location');
+                    const shopWebsite = this.getAttribute('data-shop-website');
+                    const shopCategory = this.getAttribute('data-shop-category');
+                    const shopDescription = this.getAttribute('data-shop-description');
+                    const shopRegistrationDate = this.getAttribute('data-shop-registration-date');
+                    const postDate = this.getAttribute('data-post-date');
+                    const imageUrl = this.getAttribute('data-image-url');
+
+                    showPostDetailsModal({
+                        postId,
+                        title,
+                        description,
+                        shopName,
+                        shopOwner,
+                        shopEmail,
+                        shopPhone,
+                        shopAddress,
+                        shopLocation,
+                        shopWebsite,
+                        shopCategory,
+                        shopDescription,
+                        shopRegistrationDate,
+                        postDate,
+                        imageUrl
+                    });
+                });
+            });
+        });
+
+        function showDonationModal(donationId, title, amount) {
+            const modal = document.getElementById('donationModal');
+            const qrCodeElement = document.getElementById('qrCode');
+            const campaignTitleElement = document.getElementById('campaignTitle');
+            const paymentAmountElement = document.getElementById('paymentAmount');
+
+            // Set campaign details
+            campaignTitleElement.textContent = title;
+            paymentAmountElement.textContent = '₹' + amount;
+
+            // Generate Gpay payment link
+            const paymentLink = `upi://pay?pa=upiid@bank&pn=Marketplace&cu=INR&tn=Donation for ${encodeURIComponent(title)}`;
+            
+            // Generate QR code
+            const qr = qrcode(0, 'L');
+            qr.addData(paymentLink);
+            qr.make();
+            qrCodeElement.innerHTML = qr.createImgTag(4);
+
+            // Show modal
+            modal.style.display = 'block';
+        }
+
+        function closeDonationModal() {
+            const modal = document.getElementById('donationModal');
+            modal.style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('donationModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function showPostDetailsModal(details) {
+            const modal = document.getElementById('postDetailsModal');
+            
+            // Set post details
+            document.getElementById('detailsPostTitle').textContent = details.title;
+            document.getElementById('detailsPostDescription').textContent = details.description;
+            document.getElementById('detailsPostDate').textContent = details.postDate;
+            
+            // Set shop details
+            document.getElementById('detailsShopName').textContent = details.shopName;
+            document.getElementById('detailsShopOwner').textContent = details.shopOwner;
+            document.getElementById('detailsShopCategory').textContent = details.shopCategory;
+            document.getElementById('detailsShopLocation').textContent = details.shopLocation;
+            document.getElementById('detailsShopAddress').textContent = details.shopAddress;
+            document.getElementById('detailsShopEmail').textContent = details.shopEmail;
+            document.getElementById('detailsShopPhone').textContent = details.shopPhone;
+            document.getElementById('detailsShopWebsite').textContent = details.shopWebsite;
+            document.getElementById('detailsShopRegistrationDate').textContent = details.shopRegistrationDate;
+            document.getElementById('detailsShopDescription').textContent = details.shopDescription;
+            
+            // Set post image
+            const postImage = document.getElementById('detailsPostImage');
+            if (details.imageUrl) {
+                postImage.src = details.imageUrl;
+                postImage.style.display = 'block';
+            } else {
+                postImage.style.display = 'none';
+            }
+
+            // Show modal
+            modal.style.display = 'block';
+        }
+
+        function closePostDetailsModal() {
+            const modal = document.getElementById('postDetailsModal');
+            modal.style.display = 'none';
+        }
+
+        // Close post details modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('postDetailsModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>User Management - Marketplace</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gold: #D4AF37;
+            --primary-navy: #1A237E;
+            --primary-white: #FFFFFF;
+            --secondary-gold: #FFD700;
+            --secondary-navy: #283593;
+            --text-dark: #333333;
+            --text-light: #666666;
+            --background-light: #F5F5F5;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-light);
+        }
+
+        .header {
+            background-color: var(--primary-white);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 4rem;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-gold);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--primary-navy);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-gold);
+        }
+
+        .nav-links button {
+            background: none;
+            border: none;
+            color: var(--primary-navy);
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links button:hover {
+            color: var(--primary-gold);
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--primary-navy);
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .logout-btn:hover {
+            color: var(--primary-gold);
+        }
+
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+            margin-top: 0;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background: var(--primary-navy);
+            color: var(--primary-white);
+            padding: 1.5rem;
+            position: fixed;
+            height: calc(100vh - 4rem);
+            top: 4rem;
+            left: 0;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            z-index: 998;
+        }
+
+        .sidebar-header {
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--primary-gold);
+        }
+
+        .sidebar-header .logo i {
+            font-size: 1.75rem;
+        }
+
+        .sidebar-header .logo h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav li a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--primary-white);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-nav li a:hover {
+            background-color: rgba(255,255,255,0.1);
+            transform: translateX(5px);
+        }
+
+        .sidebar-nav li.active a {
+            background-color: var(--primary-gold);
+            color: var(--primary-navy);
+        }
+
+        .sidebar-nav li a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            background: var(--background-light);
+            min-height: 100vh;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        .main-header {
+            background: var(--primary-white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 0;
+            text-align: center;
+            position: fixed;
+            top: 4rem;
+            left: 250px;
+            right: 0;
+            z-index: 999;
+            width: calc(100% - 250px);
+            border-top: 1px solid #eee;
+        }
+
+        .main-header h1 {
+            color: var(--primary-navy);
+            margin: 0;
+            font-size: 1.75rem;
+        }
+
+        /* User Management Styles */
+        .dashboard-content {
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            margin-top: 8rem;
+        }
+
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .user-card {
+            background: var(--primary-white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .user-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .user-info h4 {
+            color: var(--primary-navy);
+            margin: 0 0 1rem 0;
+        }
+
+        .user-info p {
+            color: var(--text-light);
+            margin: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-details {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .user-details p {
+            color: var(--text-light);
+            margin: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-edit {
+            background: var(--primary-gold);
+            color: var(--primary-navy);
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: var(--primary-white);
+        }
+
+        .btn-suspend {
+            background: var(--primary-navy);
+            color: var(--primary-white);
+        }
+
+        .btn-activate {
+            background: #28a745;
+            color: var(--primary-white);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: var(--primary-white);
+            margin: 2% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .close {
+            color: var(--text-light);
+            position: absolute;
+            right: 20px;
+            top: 10px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close:hover {
+            color: var(--primary-navy);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary-navy);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-gold);
+            color: var(--primary-navy);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-gold);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--primary-navy);
+            color: var(--primary-white);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-navy);
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: #dc3545;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-header {
+                margin-left: 0;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .users-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 1% auto;
+                padding: 15px;
+            }
+
+            .form-group input,
+            .form-group select {
+                padding: 0.5rem;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                padding: 0.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <a href="/" class="logo">Marketplace</a>
+            <div class="nav-links">
+                <a href="/"><i class="fas fa-home"></i> Home</a>
+                <a sec:authorize="hasRole('ROLE_ADMIN')" href="/admin/dashboard" class="active">
+                    <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                </a>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-store"></i>
+                    <h2>Marketplace</h2>
+                </div>
+            </div>
+            <ul class="sidebar-nav">
+                <li th:classappend="${currentPath == '/admin/shops' ? 'active' : ''}">
+                    <a href="/admin/shops">
+                        <i class="fas fa-store"></i>
+                        <span>Shops</span>
+                    </a>
+                </li>
+                <li th:classappend="${currentPath == '/admin/posts' ? 'active' : ''}">
+                    <a href="/admin/posts">
+                        <i class="fas fa-list"></i>
+                        <span>Posts</span>
+                    </a>
+                </li>
+                <li th:classappend="${currentPath == '/admin/users' ? 'active' : ''}">
+                    <a href="/admin/users">
+                        <i class="fas fa-users"></i>
+                        <span>Users</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <h1>User Management</h1>
+            </header>
+
+            <div class="dashboard-content">
+                <div class="users-grid">
+                    <!-- User Cards will be dynamically populated here -->
+                    <div class="user-card" th:each="user : ${users}">
+                        <div class="user-info">
+                            <h4 th:text="${user.username}">User Name</h4>
+                            <p><i class="fas fa-envelope"></i> <span th:text="${user.email}">user@example.com</span></p>
+                        </div>
+                        <div class="user-details">
+                            <p><strong>Role:</strong> <span th:text="${user.role}">User Role</span></p>
+                            <p><strong>Status:</strong> <span th:text="${user.status}">Active</span></p>
+                            <p><strong>Joined:</strong> <span th:text="${#temporals.format(user.registrationDate, 'dd MMM yyyy')}">01 Jan 2023</span></p>
+                        </div>
+                        <div class="user-actions">
+                            <button class="btn btn-edit" th:attr="onclick='editUser(\'' + ${user.id} + '\')'">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-suspend" th:if="${user.status == 'ACTIVE'}" th:attr="onclick='suspendUser(\'' + ${user.id} + '\')'">
+                                <i class="fas fa-ban"></i> Suspend
+                            </button>
+                            <button class="btn btn-activate" th:if="${user.status == 'INACTIVE'}" th:attr="onclick='activateUser(\'' + ${user.id} + '\')'">
+                                <i class="fas fa-check"></i> Activate
+                            </button>
+                            <button class="btn btn-delete" th:attr="onclick='deleteUser(\'' + ${user.id} + '\')'">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('editUserModal')">&times;</span>
+            <h2>Edit User</h2>
+            <form id="editUserForm" onsubmit="updateUser(event)">
+                <input type="hidden" id="editUserId" name="id">
+                <div class="form-group">
+                    <label for="editUserName">Username</label>
+                    <input type="text" id="editUserName" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="editUserEmail">Email</label>
+                    <input type="email" id="editUserEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="editUserRole">Role</label>
+                    <select id="editUserRole" name="role" required>
+                        <option value="ADMIN">Admin</option>
+                        <option value="SHOP_OWNER">Shop Owner</option>
+                        <option value="USER">User</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="closeModal('editUserModal')">Cancel</button>
+                    <button type="submit" class="btn btn-edit">Update User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            // Clear any error messages
+            const errorMessages = document.querySelectorAll('.error-message');
+            errorMessages.forEach(msg => msg.remove());
+        }
+
+        function showLoading() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading';
+            loadingDiv.innerHTML = '<div class="loading-spinner"></div>';
+            document.body.appendChild(loadingDiv);
+        }
+
+        function hideLoading() {
+            const loadingDiv = document.querySelector('.loading');
+            if (loadingDiv) {
+                loadingDiv.remove();
+            }
+        }
+
+        function showError(message, element) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            element.parentNode.appendChild(errorDiv);
+        }
+
+        // User management functions
+        function editUser(userId) {
+            showLoading();
+            fetch(`/admin/api/users/${userId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch user data');
+                    }
+                    return response.json();
+                })
+                .then(user => {
+                    document.getElementById('editUserId').value = user.id;
+                    document.getElementById('editUserName').value = user.username;
+                    document.getElementById('editUserEmail').value = user.email;
+                    document.getElementById('editUserRole').value = user.role;
+                    openModal('editUserModal');
+                })
+                .catch(error => {
+                    alert('Error loading user data: ' + error.message);
+                })
+                .finally(() => {
+                    hideLoading();
+                });
+        }
+
+        function updateUser(event) {
+            event.preventDefault();
+            showLoading();
+            
+            const userId = document.getElementById('editUserId').value;
+            const formData = new FormData(event.target);
+            const userData = Object.fromEntries(formData.entries());
+
+            fetch(`/admin/api/users/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+                },
+                body: JSON.stringify(userData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.message || 'Failed to update user');
+                    });
+                }
+                closeModal('editUserModal');
+                location.reload();
+            })
+            .catch(error => {
+                showError(error.message, event.target);
+            })
+            .finally(() => {
+                hideLoading();
+            });
+        }
+
+        function suspendUser(userId) {
+            if (confirm('Are you sure you want to suspend this user?')) {
+                fetch(`/admin/api/users/${userId}/suspend`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                });
+            }
+        }
+
+        function activateUser(userId) {
+            if (confirm('Are you sure you want to activate this user?')) {
+                fetch(`/admin/api/users/${userId}/activate`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                });
+            }
+        }
+
+        function deleteUser(userId) {
+            if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                fetch(`/admin/api/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html> 

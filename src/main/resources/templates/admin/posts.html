@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Post Management - Marketplace</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gold: #D4AF37;
+            --primary-navy: #1A237E;
+            --primary-white: #FFFFFF;
+            --secondary-gold: #FFD700;
+            --secondary-navy: #283593;
+            --text-dark: #333333;
+            --text-light: #666666;
+            --background-light: #F5F5F5;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-light);
+        }
+
+        .header {
+            background-color: var(--primary-white);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 4rem;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-gold);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--primary-navy);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-gold);
+        }
+
+        .nav-links form {
+            margin: 0;
+        }
+
+        .nav-links button {
+            background: none;
+            border: none;
+            color: var(--primary-navy);
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links button:hover {
+            color: var(--primary-gold);
+        }
+
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+            margin-top: 0;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background: var(--primary-navy);
+            color: var(--primary-white);
+            padding: 1.5rem;
+            position: fixed;
+            height: calc(100vh - 4rem);
+            top: 4rem;
+            left: 0;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            z-index: 998;
+        }
+
+        .sidebar-header {
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--primary-gold);
+        }
+
+        .sidebar-header .logo i {
+            font-size: 1.75rem;
+        }
+
+        .sidebar-header .logo h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav li a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--primary-white);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-nav li a:hover {
+            background-color: rgba(255,255,255,0.1);
+            transform: translateX(5px);
+        }
+
+        .sidebar-nav li.active a {
+            background-color: var(--primary-gold);
+            color: var(--primary-navy);
+        }
+
+        .sidebar-nav li a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            background: var(--background-light);
+            min-height: 100vh;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        .main-header {
+            background: var(--primary-white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 0;
+            text-align: center;
+            position: fixed;
+            top: 4rem;
+            left: 250px;
+            right: 0;
+            z-index: 999;
+            width: calc(100% - 250px);
+        }
+
+        .main-header h1 {
+            color: var(--primary-navy);
+            margin: 0;
+            font-size: 1.75rem;
+        }
+
+        /* Post Management Styles */
+        .dashboard-content {
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: 8rem auto 0;
+        }
+
+        .regular-posts, .donation-posts {
+            background: var(--primary-white);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            color: var(--primary-navy);
+            margin: 0;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .badge {
+            background: var(--primary-gold);
+            color: var(--primary-navy);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .post-card {
+            background: var(--background-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .post-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .post-info h4 {
+            color: var(--primary-navy);
+            margin: 0 0 1rem 0;
+        }
+
+        .post-info p {
+            color: var(--text-light);
+            margin: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .post-meta {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--primary-white);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-status { 
+            background: var(--primary-gold);
+            color: var(--primary-navy);
+        }
+
+        .btn-delete { 
+            background: #dc3545;
+            color: var(--primary-white);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-create {
+            background-color: var(--primary-gold);
+            color: var(--primary-navy);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-create:hover {
+            background-color: var(--secondary-gold);
+            transform: translateY(-2px);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: var(--primary-white);
+            margin: 2% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 800px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-header h2 {
+            color: var(--primary-navy);
+            margin: 0;
+        }
+
+        .modal-body {
+            flex: 1;
+            padding: 0 2rem;
+            overflow-y: auto;
+            max-height: calc(100vh - 12rem);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary-navy);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-cancel {
+            background-color: var(--primary-navy);
+            color: var(--primary-white);
+        }
+
+        .btn-submit {
+            background-color: var(--primary-gold);
+            color: var(--primary-navy);
+        }
+
+        .btn-cancel:hover {
+            background-color: var(--secondary-navy);
+        }
+
+        .btn-submit:hover {
+            background-color: var(--secondary-gold);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: var(--background-light);
+            border-radius: 12px;
+            margin-top: 2rem;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--primary-gold);
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            color: var(--primary-navy);
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: var(--text-light);
+        }
+
+        @media (max-width: 768px) {
+            .main-header {
+                margin-left: 0;
+                width: 100%;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .posts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 1% auto;
+                padding: 15px;
+            }
+
+            .form-group input,
+            .form-group textarea {
+                padding: 0.5rem;
+            }
+
+            .btn-create {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <a href="/" class="logo">Marketplace</a>
+            <div class="nav-links">
+                <a href="/"><i class="fas fa-home"></i> Home</a>
+                <a sec:authorize="hasRole('ROLE_ADMIN')" href="/admin/dashboard" class="active">
+                    <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                </a>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-store"></i>
+                    <h2>Marketplace</h2>
+                </div>
+            </div>
+            <ul class="sidebar-nav">
+                <li th:classappend="${currentPath == '/admin/shops' ? 'active' : ''}">
+                    <a href="/admin/shops">
+                        <i class="fas fa-store"></i>
+                        <span>Shops</span>
+                    </a>
+                </li>
+                <li class="active">
+                    <a href="/admin/posts">
+                        <i class="fas fa-list"></i>
+                        <span>Posts</span>
+                    </a>
+                </li>
+                <li th:classappend="${currentPath == '/admin/users' ? 'active' : ''}">
+                    <a href="/admin/users">
+                        <i class="fas fa-users"></i>
+                        <span>Users</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <h1>Post Management</h1>
+            </header>
+
+            <div class="dashboard-content">
+                <!-- Regular Posts Section -->
+                <section class="regular-posts">
+                    <div class="section-header">
+                        <div class="header-left">
+                            <h2>Regular Posts</h2>
+                            <span class="badge" th:text="${regularPosts.size()}">0</span>
+                        </div>
+                    </div>
+                    <div class="posts-grid" th:if="${not #lists.isEmpty(regularPosts)}">
+                        <div th:each="post : ${regularPosts}" 
+                             class="post-card" 
+                             th:data-post-id="${post.id}"
+                             th:data-post-type="REGULAR"
+                             th:data-post-status="${post.status}">
+                            <div class="post-info">
+                                <h4 th:text="${post.title}">Post Title</h4>
+                                <p class="post-description" th:text="${post.description}">Post Description</p>
+                                <div class="post-meta">
+                                    <p><i class="fas fa-user"></i> <span th:text="${postAuthors.get(post.id)?.username ?: 'Unknown'}">Author</span></p>
+                                    <p><i class="fas fa-tag"></i> <span th:text="${post.category}">Category</span></p>
+                                    <p><i class="fas fa-calendar"></i> <span th:text="${post.date}">Date</span></p>
+                                </div>
+                                <div class="post-status">
+                                    <span class="status-badge" th:classappend="${post.status == 'ACTIVE' ? 'active' : 'inactive'}">
+                                        <i class="fas" th:classappend="${post.status == 'ACTIVE' ? 'fa-check-circle' : 'fa-ban'}"></i>
+                                        <span th:text="${post.status}">Status</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="post-actions">
+                                <button class="btn btn-status" 
+                                        th:data-post-id="${post.id}"
+                                        th:data-post-type="REGULAR">
+                                    <i class="fas" th:classappend="${post.status == 'ACTIVE' ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                                    <span th:text="${post.status == 'ACTIVE' ? 'Hide' : 'Show'}">Toggle Status</span>
+                                </button>
+                                <button class="btn btn-delete" 
+                                        th:data-post-id="${post.id}"
+                                        th:data-post-type="REGULAR">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="empty-state" th:if="${#lists.isEmpty(regularPosts)}">
+                        <i class="fas fa-list"></i>
+                        <h3>No Regular Posts Found</h3>
+                        <p>There are currently no regular posts in the system.</p>
+                    </div>
+                </section>
+
+                <!-- Donation Posts Section -->
+                <section class="donation-posts">
+                    <div class="section-header">
+                        <div class="header-left">
+                            <h2>Donation Posts</h2>
+                            <span class="badge" th:text="${donationPosts.size()}">0</span>
+                        </div>
+                        <button class="btn btn-create" onclick="openModal()">
+                            <i class="fas fa-plus"></i> Create New Donation Post
+                        </button>
+                    </div>
+                    <div class="posts-grid" th:if="${not #lists.isEmpty(donationPosts)}">
+                        <div th:each="post : ${donationPosts}" 
+                             class="post-card" 
+                             th:data-post-id="${post.id}"
+                             th:data-post-type="DONATION"
+                             th:data-post-status="${post.status}">
+                            <div class="post-info">
+                                <h4 th:text="${post.title}">Post Title</h4>
+                                <p class="post-description" th:text="${post.description}">Post Description</p>
+                                <div class="post-meta">
+                                    <p><i class="fas fa-user"></i> <span th:text="${postAuthors.get(post.id)?.username ?: 'Unknown'}">Author</span></p>
+                                    <p><i class="fas fa-bullseye"></i> Target: <span th:text="${post.targetAmount}">0</span></p>
+                                    <p><i class="fas fa-hand-holding-usd"></i> Received: <span th:text="${post.receivedAmount}">0</span></p>
+                                    <p><i class="fas fa-hourglass-end"></i> End Date: <span th:text="${post.endDate}">End Date</span></p>
+                                    <p><i class="fas fa-calendar"></i> <span th:text="${post.date}">Date</span></p>
+                                </div>
+                                <div class="post-status">
+                                    <span class="status-badge" th:classappend="${post.status == 'ACTIVE' ? 'active' : 'inactive'}">
+                                        <i class="fas" th:classappend="${post.status == 'ACTIVE' ? 'fa-check-circle' : 'fa-ban'}"></i>
+                                        <span th:text="${post.status}">Status</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="post-actions">
+                                <button class="btn btn-edit" 
+                                        th:data-post-id="${post.id}"
+                                        th:data-post-type="DONATION">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="btn btn-status" 
+                                        th:data-post-id="${post.id}"
+                                        th:data-post-type="DONATION">
+                                    <i class="fas" th:classappend="${post.status == 'ACTIVE' ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                                    <span th:text="${post.status == 'ACTIVE' ? 'Hide' : 'Show'}">Toggle Status</span>
+                                </button>
+                                <button class="btn btn-delete" 
+                                        th:data-post-id="${post.id}"
+                                        th:data-post-type="DONATION">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="empty-state" th:if="${#lists.isEmpty(donationPosts)}">
+                        <i class="fas fa-list"></i>
+                        <h3>No Donation Posts Found</h3>
+                        <p>There are currently no donation posts in the system.</p>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Form -->
+    <div id="donationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Donation Post</h2>
+            </div>
+            <div class="modal-body">
+                <form id="donationForm" onsubmit="submitDonationForm(event)">
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input type="text" id="title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="targetAmount">Target Amount</label>
+                        <input type="number" id="targetAmount" name="targetAmount" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">End Date</label>
+                        <input type="date" id="endDate" name="endDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="imageUrl">Image URL (Optional)</label>
+                        <input type="url" id="imageUrl" name="imageUrl">
+                    </div>
+                </form>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-submit" form="donationForm">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal Form -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Post</h2>
+            </div>
+            <div class="modal-body">
+                <form id="editForm" onsubmit="submitEditForm(event)">
+                    <div class="form-group">
+                        <label for="editTitle">Title</label>
+                        <input type="text" id="editTitle" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDescription">Description</label>
+                        <textarea id="editDescription" name="description" required></textarea>
+                    </div>
+                    <div id="donationFields" style="display: none;">
+                        <div class="form-group">
+                            <label for="editTargetAmount">Target Amount</label>
+                            <input type="number" id="editTargetAmount" name="targetAmount" min="0" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label for="editEndDate">End Date</label>
+                            <input type="date" id="editEndDate" name="endDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="editImageUrl">Image URL (Optional)</label>
+                            <input type="url" id="editImageUrl" name="imageUrl">
+                        </div>
+                    </div>
+                    <input type="hidden" id="editPostId" name="postId">
+                    <input type="hidden" id="editPostType" name="postType">
+                </form>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-cancel" onclick="closeEditModal()">Cancel</button>
+                <button type="submit" class="btn btn-submit" form="editForm">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Remove post card click handler
+            const postCards = document.querySelectorAll('.post-card');
+            postCards.forEach(card => {
+                card.style.cursor = 'default';
+            });
+
+            // Handle edit button clicks
+            document.querySelectorAll('.btn-edit').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const postId = this.getAttribute('data-post-id');
+                    const postType = this.getAttribute('data-post-type');
+                    openEditModal(postId, postType);
+                });
+            });
+
+            // Handle status toggle
+            document.querySelectorAll('.btn-status').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const postId = this.getAttribute('data-post-id');
+                    const postType = this.getAttribute('data-post-type');
+                    togglePostStatus(postId, postType);
+                });
+            });
+
+            // Handle delete button clicks
+            document.querySelectorAll('.btn-delete').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const postId = this.getAttribute('data-post-id');
+                    const postType = this.getAttribute('data-post-type');
+                    deletePost(postId, postType);
+                });
+            });
+        });
+
+        // Add logging for debugging
+        function logPostAction(action, postId, postType) {
+            console.log(`Post Action: ${action}`, {
+                postId: postId,
+                postType: postType,
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        // Toggle post status
+        function togglePostStatus(postId, postType) {
+            const url = postType === 'REGULAR' 
+                ? `/admin/posts/regular/${postId}/toggle-status`
+                : `/admin/posts/${postId}/toggle-status`;
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').getAttribute('content')
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to toggle post status');
+                }
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Delete post
+        function deletePost(postId, postType) {
+            logPostAction('delete', postId, postType);
+            const postTypeText = postType === 'DONATION' ? 'donation' : 'regular';
+            if (confirm(`Are you sure you want to delete this ${postTypeText} post? This action cannot be undone.`)) {
+                const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+                
+                // Use the correct endpoint based on post type
+                const endpoint = postType === 'DONATION' 
+                    ? `/admin/donation-posts/${postId}`
+                    : `/admin/posts/regular/${postId}`;
+                
+                console.log('Making request to:', endpoint);
+                
+                fetch(endpoint, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [header]: token
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    } else {
+                        return response.text().then(text => {
+                            throw new Error(text || 'Failed to delete post');
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert(error.message);
+                });
+            }
+        }
+
+        // Open edit modal
+        function openEditModal(postId, postType) {
+            logPostAction('edit', postId, postType);
+            console.log('Opening edit modal for post:', postId, 'type:', postType);
+            
+            const modal = document.getElementById('editModal');
+            const donationFields = document.getElementById('donationFields');
+            const editPostId = document.getElementById('editPostId');
+            const editPostType = document.getElementById('editPostType');
+            
+            // Set post ID and type in hidden fields
+            editPostId.value = postId;
+            editPostType.value = postType;
+            
+            // Show/hide donation fields based on post type
+            donationFields.style.display = postType === 'DONATION' ? 'block' : 'none';
+            
+            // Use the correct endpoint based on post type
+            const endpoint = `/admin/posts/${postId}`;
+            
+            console.log('Fetching post data from:', endpoint);
+            
+            // Add CSRF token to headers
+            const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+            
+            fetch(endpoint, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    [header]: token
+                }
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(post => {
+                console.log('Received post data:', post);
+                
+                // Populate form fields
+                const titleField = document.getElementById('editTitle');
+                const descriptionField = document.getElementById('editDescription');
+                
+                if (titleField && descriptionField) {
+                    titleField.value = post.title || '';
+                    descriptionField.value = post.description || '';
+                    
+                    if (postType === 'DONATION') {
+                        const targetAmountField = document.getElementById('editTargetAmount');
+                        const endDateField = document.getElementById('editEndDate');
+                        const imageUrlField = document.getElementById('editImageUrl');
+                        
+                        if (targetAmountField) targetAmountField.value = post.targetAmount || '';
+                        if (endDateField) endDateField.value = post.endDate || '';
+                        if (imageUrlField) imageUrlField.value = post.imageUrl || '';
+                    }
+                    
+                    // Show the modal after populating fields
+                    modal.style.display = 'block';
+                } else {
+                    throw new Error('Required form fields not found');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading post data:', error);
+                alert('Error loading post data: ' + error.message);
+            });
+        }
+
+        // Close edit modal
+        function closeEditModal() {
+            const modal = document.getElementById('editModal');
+            modal.style.display = 'none';
+        }
+
+        // Handle edit form submission
+        function submitEditForm(event) {
+            event.preventDefault();
+            
+            const postId = document.getElementById('editPostId').value;
+            const postType = document.getElementById('editPostType').value;
+            const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+            
+            // Get form data
+            const formData = {
+                title: document.getElementById('editTitle').value,
+                description: document.getElementById('editDescription').value
+            };
+            
+            // Add donation-specific fields if needed
+            if (postType === 'DONATION') {
+                const targetAmount = document.getElementById('editTargetAmount').value;
+                const endDate = document.getElementById('editEndDate').value;
+                const imageUrl = document.getElementById('editImageUrl').value;
+                
+                // Convert targetAmount to number
+                formData.targetAmount = parseFloat(targetAmount);
+                formData.endDate = endDate;
+                formData.imageUrl = imageUrl;
+            }
+            
+            console.log('Submitting edit form with data:', formData);
+            
+            // Use the correct endpoint based on post type
+            const endpoint = `/admin/posts/${postId}`;
+            
+            fetch(endpoint, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [header]: token
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                console.log('Edit response status:', response.status);
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);
+                    });
+                }
+                return response.text();
+            })
+            .then(message => {
+                console.log('Edit successful:', message);
+                closeEditModal();
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error updating post:', error);
+                alert('Error updating post: ' + error.message);
+            });
+        }
+
+        // Handle form submission
+        function submitDonationForm(event) {
+            event.preventDefault();
+            
+            const formData = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                targetAmount: document.getElementById('targetAmount').value,
+                endDate: document.getElementById('endDate').value,
+                imageUrl: document.getElementById('imageUrl').value,
+                type: 'DONATION'
+            };
+
+            const token = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+            const header = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+            fetch('/admin/posts/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [header]: token
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    throw new Error('Failed to create post');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error creating donation post: ' + error.message);
+            });
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('donationModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html> 

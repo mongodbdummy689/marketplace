@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Marketplace</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gold: #D4AF37;
+            --primary-navy: #1A237E;
+            --primary-white: #FFFFFF;
+            --secondary-gold: #FFD700;
+            --secondary-navy: #283593;
+            --text-dark: #333333;
+            --text-light: #666666;
+            --background-light: #F5F5F5;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-light);
+        }
+
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+            margin-top: 0;
+        }
+
+        .header {
+            background-color: var(--primary-white);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            height: 4rem;
+        }
+
+        .main-header {
+            background: var(--primary-white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 4rem 0 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 999;
+            width: calc(100% - 250px);
+            margin-left: 250px;
+        }
+
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background: var(--primary-navy);
+            color: var(--primary-white);
+            padding: 1.5rem;
+            position: fixed;
+            height: 100vh;
+            top: 4rem;
+            left: 0;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            z-index: 998;
+        }
+
+        .sidebar-header {
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--primary-gold);
+        }
+
+        .sidebar-header .logo i {
+            font-size: 1.75rem;
+        }
+
+        .sidebar-header .logo h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav li a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--primary-white);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-nav li a:hover {
+            background-color: rgba(255,255,255,0.1);
+            transform: translateX(5px);
+        }
+
+        .sidebar-nav li.active a {
+            background-color: var(--primary-gold);
+            color: var(--primary-navy);
+        }
+
+        .sidebar-nav li a i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            background: var(--background-light);
+            min-height: 100vh;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+
+        .main-header {
+            background: var(--primary-white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .main-header h1 {
+            color: var(--primary-navy);
+            margin: 0;
+            font-size: 1.75rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .welcome-text {
+            color: var(--text-light);
+        }
+
+        .notifications {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--primary-gold);
+            color: var(--primary-navy);
+            border-radius: 50%;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--primary-white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-gold);
+            color: var(--primary-navy);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-info h3 {
+            color: var(--text-light);
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .stat-info p {
+            color: var(--primary-navy);
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* Dashboard Sections */
+        .dashboard-section {
+            background: var(--primary-white);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-gold);
+        }
+
+        .section-header h2 {
+            color: var(--primary-navy);
+            margin: 0;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .view-all {
+            color: var(--primary-gold);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .view-all:hover {
+            color: var(--secondary-gold);
+        }
+
+        /* Activities List */
+        .activities-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--background-light);
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .activity-item:hover {
+            transform: translateX(5px);
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .activity-icon.activity-shop {
+            background: var(--primary-gold);
+            color: var(--primary-navy);
+        }
+
+        .activity-icon.activity-post {
+            background: var(--primary-navy);
+            color: var(--primary-white);
+        }
+
+        .activity-icon.activity-donation {
+            background: #28a745;
+            color: var(--primary-white);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-content p {
+            margin: 0;
+            color: var(--text-dark);
+        }
+
+        .activity-date {
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        /* Shop Management */
+        .shop-management {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .shop-card {
+            background: var(--background-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .shop-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .shop-info h4 {
+            color: var(--primary-navy);
+            margin: 0 0 1rem 0;
+        }
+
+        .shop-info p {
+            color: var(--text-light);
+            margin: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .shop-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-approve, .btn-reject {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-approve {
+            background: var(--primary-gold);
+            color: var(--primary-navy);
+        }
+
+        .btn-reject {
+            background: var(--primary-navy);
+            color: var(--primary-white);
+        }
+
+        .btn-approve:hover, .btn-reject:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Posts List */
+        .posts-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .post-card {
+            background: var(--background-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .post-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .post-header h4 {
+            color: var(--primary-navy);
+            margin: 0;
+        }
+
+        .post-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            background: var(--primary-gold);
+            color: var(--primary-navy);
+        }
+
+        .post-description {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .post-meta {
+            display: flex;
+            gap: 1rem;
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+
+        .post-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-header {
+                margin-left: 0;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .shop-management, .posts-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <a href="/" class="logo">Marketplace</a>
+            <div class="nav-links">
+                <a href="/"><i class="fas fa-home"></i> Home</a>
+                <a sec:authorize="hasRole('ROLE_ADMIN')" href="/admin/dashboard" class="active">
+                    <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                </a>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <header class="main-header">
+        <h1>Dashboard Overview</h1>
+        <div class="user-info">
+            <span class="welcome-text">Welcome, Admin</span>
+            <div class="notifications">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">3</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-store"></i>
+                    <h2>Marketplace</h2>
+                </div>
+            </div>
+            <ul class="sidebar-nav">
+                <li th:classappend="${currentPath == '/admin/dashboard' ? 'active' : ''}">
+                    <a href="/admin/dashboard">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Overview</span>
+                    </a>
+                </li>
+                <li th:classappend="${currentPath == '/admin/shops' ? 'active' : ''}">
+                    <a href="/admin/shops">
+                        <i class="fas fa-store"></i>
+                        <span>Shops</span>
+                    </a>
+                </li>
+                <li th:classappend="${currentPath == '/admin/posts' ? 'active' : ''}">
+                    <a href="/admin/posts">
+                        <i class="fas fa-list"></i>
+                        <span>Posts</span>
+                    </a>
+                </li>
+                <li th:classappend="${currentPath == '/admin/users' ? 'active' : ''}">
+                    <a href="/admin/users">
+                        <i class="fas fa-users"></i>
+                        <span>Users</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="dashboard-content">
+                <!-- Stats Cards -->
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-store"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total Shops</h3>
+                            <p th:text="${totalShops}">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total Posts</h3>
+                            <p th:text="${totalPosts}">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-hand-holding-heart"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total Donations</h3>
+                            <p th:text="${totalDonations}">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activities -->
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-history"></i> Recent Activities</h2>
+                        <a href="#" class="view-all">View All</a>
+                    </div>
+                    <div class="activities-list">
+                        <div th:each="activity : ${recentActivities}" class="activity-item">
+                            <div class="activity-icon" th:classappend="'activity-' + ${activity.type.toLowerCase()}">
+                                <i th:if="${activity.type == 'SHOP'}" class="fas fa-store"></i>
+                                <i th:if="${activity.type == 'POST'}" class="fas fa-list"></i>
+                                <i th:if="${activity.type == 'DONATION'}" class="fas fa-hand-holding-heart"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p th:text="${activity.description}">Description</p>
+                                <span class="activity-date" th:text="${activity.date}">Date</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Shop Management -->
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-store"></i> Shop Management</h2>
+                        <a href="/admin/shops" class="view-all">View All</a>
+                    </div>
+                    <div class="shop-management">
+                        <div class="pending-shops">
+                            <h3>Pending Approvals</h3>
+                            <div th:each="shop : ${pendingShops}" class="shop-card">
+                                <div class="shop-info">
+                                    <h4 th:text="${shop.name}">Shop Name</h4>
+                                    <p><i class="fas fa-map-marker-alt"></i> <span th:text="${shop.location}">Location</span></p>
+                                    <p><i class="fas fa-user"></i> <span th:text="${shop.owner}">Owner</span></p>
+                                    <p><i class="fas fa-envelope"></i> <span th:text="${shop.email}">Email</span></p>
+                                    <p><i class="fas fa-phone"></i> <span th:text="${shop.phone}">Phone</span></p>
+                                    <p><i class="fas fa-tag"></i> <span th:text="${shop.businessType}">Business Type</span></p>
+                                    <p><i class="fas fa-info-circle"></i> <span th:text="${shop.description}">Description</span></p>
+                                </div>
+                                <div class="shop-actions">
+                                    <button onclick="approveShop(${shop.id})" class="btn-approve">
+                                        <i class="fas fa-check"></i> Approve
+                                    </button>
+                                    <button onclick="rejectShop(${shop.id})" class="btn-reject">
+                                        <i class="fas fa-times"></i> Reject
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Recent Posts -->
+                <section class="dashboard-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-list"></i> Recent Posts</h2>
+                        <a href="/admin/posts" class="view-all">View All</a>
+                    </div>
+                    <div class="posts-list">
+                        <div th:each="post : ${recentPosts}" class="post-card">
+                            <div class="post-header">
+                                <h4 th:text="${post.title}">Post Title</h4>
+                                <span class="post-status" th:text="${post.status}">Status</span>
+                            </div>
+                            <p class="post-description" th:text="${post.description}">Description</p>
+                            <div class="post-meta">
+                                <span><i class="fas fa-user"></i> <span th:text="${postAuthors[post.id]}">Author</span></span>
+                                <span><i class="fas fa-tag"></i> <span th:text="${post.category}">Category</span></span>
+                                <span><i class="fas fa-calendar"></i> <span th:text="${post.date}">Date</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function approveShop(shopId) {
+            fetch('/admin/shops/' + shopId + '/approve', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to approve shop');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while approving the shop');
+            });
+        }
+
+        function rejectShop(shopId) {
+            fetch('/admin/shops/' + shopId + '/reject', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to reject shop');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while rejecting the shop');
+            });
+        }
+    </script>
+</body>
+</html> 

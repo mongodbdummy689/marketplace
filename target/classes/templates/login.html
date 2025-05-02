@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Marketplace</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary-gold: #D4AF37;
+            --primary-navy: #1A237E;
+            --primary-white: #FFFFFF;
+            --secondary-gold: #FFD700;
+            --secondary-navy: #283593;
+            --text-dark: #333333;
+            --text-light: #666666;
+            --background-light: #F5F5F5;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-light);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-container {
+            background-color: var(--primary-white);
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            margin: 2rem;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .login-header h1 {
+            color: var(--primary-navy);
+            margin: 0 0 1rem 0;
+            font-size: 2.5rem;
+        }
+
+        .login-header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary-navy);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .error-message {
+            color: #dc3545;
+            margin-bottom: 1rem;
+            text-align: center;
+            padding: 1rem;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary-navy);
+            color: var(--primary-white);
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .login-button:hover {
+            background-color: var(--secondary-navy);
+        }
+
+        .logout-message {
+            color: #28a745;
+            margin-bottom: 1rem;
+            text-align: center;
+            padding: 1rem;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+        }
+
+        .register-section {
+            margin-top: 2rem;
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--primary-gold);
+        }
+
+        .register-button {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary-gold);
+            color: var(--primary-white);
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            margin-bottom: 1rem;
+        }
+
+        .register-button:hover {
+            background-color: var(--secondary-gold);
+        }
+
+        .register-button i {
+            font-size: 1.2rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .modal-content {
+            position: relative;
+            background-color: var(--primary-white);
+            margin: 2% auto;
+            padding: 2.5rem;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--primary-gold);
+        }
+        .modal-header h2 {
+            margin: 0;
+            color: var(--primary-navy);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.8rem;
+        }
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--primary-navy);
+            padding: 0;
+            line-height: 1;
+            transition: color 0.3s;
+        }
+        .close-modal:hover {
+            color: var(--primary-gold);
+        }
+        /* Form styles within modal */
+        .modal .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .modal .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary-navy);
+            font-weight: 500;
+        }
+        .modal .form-group input,
+        .modal .form-group select,
+        .modal .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .modal .form-group input:focus,
+        .modal .form-group select:focus,
+        .modal .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+        .modal .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        .modal .register-button {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary-gold);
+            color: var(--primary-white);
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+        .modal .register-button:hover {
+            background-color: var(--secondary-gold);
+        }
+        .success-message {
+            color: #28a745;
+            margin-bottom: 1rem;
+            text-align: center;
+            padding: 1rem;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+        }
+        .modal-title {
+            color: var(--primary-navy);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .qr-container {
+            text-align: center;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background-color: var(--background-light);
+            border-radius: 8px;
+        }
+        .qr-code {
+            max-width: 200px;
+            margin: 0 auto;
+        }
+        .payment-details {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background-color: var(--background-light);
+            border-radius: 8px;
+        }
+        .payment-details p {
+            margin: 0.5rem 0;
+            color: var(--primary-navy);
+        }
+        .payment-amount {
+            font-weight: bold;
+            color: var(--primary-gold);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .login-container {
+                margin: 1rem;
+                padding: 2rem;
+            }
+
+            .modal-content {
+                margin: 5% auto;
+                width: 95%;
+                padding: 1.5rem;
+            }
+
+            .modal .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-height: 800px) {
+            .modal-content {
+                margin: 1% auto;
+                max-height: 98vh;
+            }
+        }
+
+        .required-field::after {
+            content: " *";
+            color: #dc3545;
+        }
+        .profile-photo-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 1rem auto;
+            display: block;
+            border: 3px solid #ddd;
+        }
+        .profile-photo-upload {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .profile-photo-upload input[type="file"] {
+            display: none;
+        }
+        .profile-photo-upload label {
+            background-color: #f8f9fa;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #555;
+            border: 1px solid #ddd;
+            transition: all 0.3s;
+        }
+        .profile-photo-upload label:hover {
+            background-color: #e9ecef;
+        }
+    </style>
+    <script>
+        function openRegisterModal() {
+            showPaymentModal();
+        }
+
+        function closeRegisterModal() {
+            document.getElementById('registerModal').style.display = 'none';
+        }
+
+        function openUserRegisterModal() {
+            document.getElementById('userRegisterModal').style.display = 'block';
+        }
+
+        function closeUserRegisterModal() {
+            document.getElementById('userRegisterModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('registerModal');
+            const userModal = document.getElementById('userRegisterModal');
+            if (event.target == modal) {
+                closeRegisterModal();
+            }
+            if (event.target == userModal) {
+                closeUserRegisterModal();
+            }
+        }
+
+        function previewImage(input) {
+            const preview = document.getElementById('profilePhotoPreview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Function to show payment modal
+        function showPaymentModal() {
+            const modal = document.getElementById('paymentModal');
+            const qrCodeElement = document.getElementById('qrCode');
+            const paymentAmountElement = document.getElementById('paymentAmount');
+            const modalTitle = document.getElementById('modalTitle');
+
+            // Always set amount to 1000 RS for business registration
+            const amount = '₹1000';
+            const title = 'Business Registration Fee';
+            
+            paymentAmountElement.textContent = amount;
+            modalTitle.textContent = `Pay ${title} via UPI`;
+
+            // Generate Gpay payment link with fixed amount
+            const paymentLink = `upi://pay?pa=upiid@bank&pn=Marketplace&am=1000&cu=INR&tn=${encodeURIComponent(title)}`;
+            
+            // Generate QR code
+            const qr = qrcode(0, 'L');
+            qr.addData(paymentLink);
+            qr.make();
+            qrCodeElement.innerHTML = qr.createImgTag(4);
+
+            // Show modal
+            modal.style.display = 'block';
+        }
+
+        function closePaymentModal() {
+            const modal = document.getElementById('paymentModal');
+            modal.style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('paymentModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Marketplace</h1>
+            <p>Please sign in to continue</p>
+        </div>
+        
+        <div th:if="${param.error}" class="error-message">
+            Invalid username or password
+        </div>
+        
+        <div th:if="${param.logout}" class="logout-message">
+            You have been logged out successfully
+        </div>
+        
+        <div th:if="${param.registered}" class="success-message">
+            Registration is successful. Please wait for Admin's approval.
+        </div>
+        
+        <div th:if="${param.userRegistered}" class="success-message">
+            Successfully Registered
+        </div>
+        
+        <form th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required autofocus>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <button type="submit" class="login-button">Sign In</button>
+        </form>
+
+        <div class="register-section">
+            <button type="button" class="register-button" onclick="openRegisterModal()">
+                <i class="fas fa-store"></i>
+                Register as Business Owner
+            </button>
+            <button type="button" class="register-button" onclick="openUserRegisterModal()" style="margin-top: 1rem;">
+                <i class="fas fa-user"></i>
+                Register as User
+            </button>
+        </div>
+    </div>
+
+    <!-- Registration Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-store"></i>
+                    Register as Business Owner
+                </h2>
+                <button class="close-modal" onclick="closeRegisterModal()">&times;</button>
+            </div>
+            
+            <form th:action="@{/register/business}" method="post" enctype="multipart/form-data">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                
+                <!-- Business Information -->
+                <div class="form-group">
+                    <label for="businessName" class="required-field">Business Name</label>
+                    <input type="text" id="businessName" name="businessName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="businessType" class="required-field">Business Type</label>
+                    <select id="businessType" name="businessType" required>
+                        <option value="">Select Business Type</option>
+                        <option value="retail">Retail</option>
+                        <option value="service">Service</option>
+                        <option value="restaurant">Restaurant</option>
+                        <option value="manufacturing">Manufacturing</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="businessDescription" class="required-field">Business Description</label>
+                    <textarea id="businessDescription" name="businessDescription" rows="4" required></textarea>
+                </div>
+                
+                <!-- Profile Photo -->
+                <div class="profile-photo-upload">
+                    <img id="profilePhotoPreview" class="profile-photo-preview" src="/images/default-profile.png" alt="Profile Photo Preview">
+                    <label for="profilePhoto">
+                        <i class="fas fa-camera"></i> Upload Profile Photo
+                    </label>
+                    <input type="file" id="profilePhoto" name="profilePhoto" accept="image/*" onchange="previewImage(this)">
+                </div>
+                
+                <!-- Contact Information -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email" class="required-field">Email Address</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone" class="required-field">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+                </div>
+                
+                <!-- Location Information -->
+                <div class="form-group">
+                    <label for="address" class="required-field">Business Address</label>
+                    <input type="text" id="address" name="address" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="city" class="required-field">City</label>
+                        <input type="text" id="city" name="city" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="postalCode" class="required-field">Postal Code</label>
+                        <input type="text" id="postalCode" name="postalCode" required>
+                    </div>
+                </div>
+                
+                <!-- Account Information -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="username" class="required-field">Username</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password" class="required-field">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword" class="required-field">Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                </div>
+                
+                <button type="submit" class="register-button">
+                    <i class="fas fa-user-plus"></i>
+                    Register Business
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Registration Modal -->
+    <div id="userRegisterModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>
+                    <i class="fas fa-user"></i>
+                    Register as User
+                </h2>
+                <button class="close-modal" onclick="closeUserRegisterModal()">&times;</button>
+            </div>
+            
+            <form th:action="@{/register/user}" method="post">
+                <!-- Personal Information -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName" class="required-field">First Name</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="lastName" class="required-field">Last Name</label>
+                        <input type="text" id="lastName" name="lastName" required>
+                    </div>
+                </div>
+                
+                <!-- Contact Information -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="userEmail" class="required-field">Email Address</label>
+                        <input type="email" id="userEmail" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userPhone" class="required-field">Phone Number</label>
+                        <input type="tel" id="userPhone" name="phone" required>
+                    </div>
+                </div>
+                
+                <!-- Location Information -->
+                <div class="form-group">
+                    <label for="userAddress" class="required-field">Address</label>
+                    <input type="text" id="userAddress" name="address" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="userCity" class="required-field">City</label>
+                        <input type="text" id="userCity" name="city" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userPostalCode" class="required-field">Postal Code</label>
+                        <input type="text" id="userPostalCode" name="postalCode" required>
+                    </div>
+                </div>
+                
+                <!-- Account Information -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="userUsername" class="required-field">Username</label>
+                        <input type="text" id="userUsername" name="username" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userPassword" class="required-field">Password</label>
+                        <input type="password" id="userPassword" name="password" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="userConfirmPassword" class="required-field">Confirm Password</label>
+                    <input type="password" id="userConfirmPassword" name="confirmPassword" required>
+                </div>
+                
+                <button type="submit" class="register-button">
+                    <i class="fas fa-user-plus"></i>
+                    Register User
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closePaymentModal()">&times;</span>
+            <h2 class="modal-title" id="modalTitle">Pay Registration Fee via UPI</h2>
+            <div class="qr-container">
+                <div id="qrCode" class="qr-code"></div>
+            </div>
+            <div class="payment-details">
+                <p>Amount: <span id="paymentAmount" class="payment-amount"></span></p>
+                <p>Scan the QR code to complete your payment</p>
+            </div>
+            <button class="register-button" onclick="closePaymentModal(); document.getElementById('registerModal').style.display = 'block';">
+                <i class="fas fa-check"></i>
+                Proceed with Registration
+            </button>
+        </div>
+    </div>
+</body>
+</html> 
